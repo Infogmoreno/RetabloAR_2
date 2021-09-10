@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>XR Spinosaurus</title>
+    <title>Retablo_San_Juan_Bautista</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -26,11 +26,7 @@
     <script src="https://unpkg.com/aframe-extras@3.3.0/dist/aframe-extras.min.js"></script>
    
     <script>
-      // Define a few custom components useful for AR mode. While these are somewhat reusable,
-      // I recommend checking if there are officially supported alternatives before copying
-      // these into new projects.
-    
-      // See also https://github.com/aframevr/aframe/pull/4356
+   
       AFRAME.registerComponent('hide-in-ar-mode', {
         // Set this object invisible while in AR mode.
         init: function () {
@@ -47,10 +43,7 @@
       });
       
       AFRAME.registerComponent('ar-shadows', {
-        // Swap an object's material to a transparent shadows-only material while
-        // in AR mode. Intended for use with a ground plane. The object is also
-        // set visible while in AR mode, this is useful if it's hidden in other
-        // modes due to them using a 3D environment.
+      
         schema: {
           opacity: {default: 0.3}
         },
@@ -83,9 +76,7 @@
       </a-assets>
       
       <a-camera position="0 1.2 0"></a-camera>
-      
-      
-      
+    
       <a-entity id="retab" position="-1 0 -3" scale="0.5 0.5 0.5">
         <a-entity position="0 2.15 0" rotation="0 55 0"
                   gltf-model="#retablo"
