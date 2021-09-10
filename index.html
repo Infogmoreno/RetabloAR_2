@@ -69,6 +69,13 @@
   </script>
   </head>  
   <body>
+     
+   
+  <a-assets>
+    <audio id="river" src="river.mp3" preload="auto"></audio>
+  </a-assets>
+
+  
 
     <a-scene renderer="antialias: true;
                    colorManagement: true;
@@ -79,8 +86,8 @@
       <a-assets>
          <a-asset-item id="retablo" src="assets/Retablo_SanJuanBautist.glb"></a-asset-item>
       </a-assets>
-      
-      <a-camera position="0 1.2 0"></a-camera>
+      <a-entity sound="src: #river"></a-entity>
+      <a-camera position="0 1.6 0"></a-camera>
     
       <a-entity id="retab" position="0 -1.7 -4" scale="0.5 0.5 0.5">
         <a-entity position="0 2.15 0" rotation="0 0 0"
