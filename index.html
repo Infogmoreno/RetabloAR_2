@@ -1,112 +1,722 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <title>Retablo_San_Juan_Bautista</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <!-- import the webpage's stylesheet -->
-    <link rel="stylesheet" href="/style.css">
+
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://supereggbert.github.io/aframe-htmlembed-component/dist/build.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@^4.1.1/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-orbit-controls@1.2.0/dist/aframe-orbit-controls.min.js"></script>
     
-    <script>
-      // WebXR requires HTTPS, so the site doesn't work if someone manually enters
-      // the URL and ends up using HTTP. To work around this, force redirect from
-      // http to https for non-localhost addresses.
-      if (window.location.protocol == "http:" &&
-          window.location.hostname != "localhost" && 
-          window.location.hostname != "127.0.0.1" &&
-          window.location.hostname != "[::1]") {
-        window.location = window.location.href.replace('http:', 'https:');        
+    <script src="ar-cursor.js"></script>
+    <script src="main.js"></script>
+    <style>
+
+
+       body{
+         width: 100%;
+         height: 700px;
+         z-index: -1;
+          }
+
+      .boton{
+            background-color: #B85C4F ;
+            opacity:1;
+            border: none;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 8px;
+            font-family:Roboto;
+            margin: 20px -2px;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 6px;
+            
+            }
+         .boton:hover{
+            opacity:0.5;
+          }
+       .boton_wire{
+            background-color: #966C3B ;
+            opacity:1;
+            border: none;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 8px;
+            font-family:Roboto;
+            margin: 20px 8px;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 100%;
+            
+            }
+        .boton_wire:hover{
+            opacity:0.5;
+          }
+      .boton_retablo{
+            background-color: #966C3B ;
+            opacity:1;
+            border: none;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 8px;
+            font-family:Roboto;
+            margin: 20px 5px;
+            padding: 6px ;
+            cursor: pointer;
+            border-radius: 100%;
+           
+            }
+        .boton_retablo:hover{
+            opacity:0.5;
+          }
+         .boton_nomen{
+            background-color: #966C3B ;
+            opacity:1;
+            border: none;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 8px;
+            font-family:Roboto;
+            margin: 20px 20px;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 6px;
+            
+            }
+         .boton_nomen:hover{
+            opacity:0.5;
+          }
+      #overlay
+          {
+            border: none; 
+            position: fixed;             
+            width:99%; 
+            height:99%; 
+            z-index: 1; 
+            pointer-events: none; /* allow click-through in transparent areas */
+          }
+
+            #menu
+          {
+            border: none;
+            position: relative; 
+            display: flex; 
+            flex-direction: column;
+            top: 70%;
+            pointer-events: none;
+          }
+
+          #mainUI
+          {
+            position:relative;
+            left: 10px;
+            height: 900px;            
+            pointer-events: auto;	
+            
+          }
+        /* Show the DOM Overlay element while active (:xr-overlay pseudoclass) */
+        #overlay:xr-overlay {
+          display: inline-block;
+          z-index:1;
+        }
+      
+      #btn_filainf{
+        width: 96%;
+        height: 30px;
+        display: grid;        
+        grid-template-columns: auto auto auto auto auto;        
+        justify-content: end;
+        align-content: end;
+        gap: 15px;
       }
-    </script>    
-    
-    <!-- import the webpage's javascript files -->
-    <script src="https://aframe.io/releases/1.0.3/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-extras@3.3.0/dist/aframe-extras.min.js"></script>
-   
+      #btn_filasup{
+        width: 96%;
+        height: auto;
+        display: grid;        
+        grid-template-columns: auto auto auto auto auto auto auto;
+        justify-content: end;
+        
+        gap: 15px;
+      }
+    </style>
     <script>
-   
-      AFRAME.registerComponent('hide-in-ar-mode', {
+      AFRAME.registerComponent("material-values", {
+        multiple: true,
+        schema: {
+          materialName: { type: "string", default: "" },
+          color: { type: "color", default: "" },
+          map: { type: "string", default: "" },
+          metalness: { type: "number", default: -1, min: 0, max: 1 },
+          roughness: { type: "number", default: -1, min: 0, max: 1 },
+          opacity: { type: "number", default: 1, min: 0, max: 1 },
+        },
+
+        events: {
+          "model-loaded": function () {
+            this.update();
+          },
+        },
+
+        init() {
+          this.rendererSystem = this.el.sceneEl.systems.renderer;
+        },
+
+        update: function () {
+          const mesh = this.el.getObject3D("mesh");
+          if (!mesh) return;
+
+          const materialName = this.data.materialName;
+          const color = this.data.color;
+          const map = this.data.map;
+          const metalness = this.data.metalness;
+          const roughness = this.data.roughness;
+          const opacity = this.data.opacity;
+          mesh.traverse((node) => {
+            if (node.material && node.material.name === materialName) {
+              if (color !== "") {
+                node.material.color.set(color);
+                // The following line calls node.material.color.convertSRGBToLinear() when <a-scene renderer="colorManagement:true">
+                this.rendererSystem.applyColorCorrection(node.material.color);
+              } else {
+                this.data.color = "#" + node.material.color.getHexString();
+              }
+
+              if (metalness !== -1) {
+                node.material.metalness = metalness;
+              } else {
+                this.data.metalness = node.material.metalness;
+              }
+
+              if (roughness !== -1) {
+                node.material.roughness = roughness;
+              } else {
+                this.data.roughness = node.material.roughness;
+              }
+
+              if (map) {
+                const imageSrc = map;
+                const loader = new THREE.TextureLoader();
+                loader.load(
+                  imageSrc,
+                  function (texture) {
+                    if (node.material.map) {
+                      texture.encoding = node.material.map.encoding;
+                      texture.flipY = node.material.map.flipY;
+                      texture.offset.copy(node.material.map.offset);
+                      texture.repeat.copy(node.material.map.repeat);
+                      texture.wrapS = node.material.map.wrapS;
+                      texture.wrapT = node.material.map.wrapT;
+                      node.material.map.dispose();
+                    }
+                    node.material.map = texture;
+                    texture.needsUpdate = true;
+                    node.material.needsUpdate = true;
+                  },
+                  undefined,
+                  function () {
+                    console.error(`Error loading ${imageSrc}`);
+                  }
+                );
+              }
+              node.material.opacity = opacity;
+              node.material.transparent = opacity < 1;
+              node.material.needsUpdate = true;
+            }
+          });
+        },
+      });
+
+      AFRAME.registerComponent("follow-shadow", {
+        schema: { type: "selector" },
+        init() {
+          this.el.object3D.renderOrder = -1;
+        },
+        tick() {
+          if (this.data) {
+            this.el.object3D.position.copy(this.data.object3D.position);
+            this.el.object3D.position.y -= 0.001; // stop z-fighting
+          }
+        },
+      });
+
+      AFRAME.registerComponent("hide-in-ar-mode", {
         // Set this object invisible while in AR mode.
         init: function () {
-          this.el.sceneEl.addEventListener('enter-vr', (ev) => {
-            this.wasVisible = this.el.getAttribute('visible');
-            if (this.el.sceneEl.is('ar-mode')) {
-              this.el.setAttribute('visible', false);
+          this.el.sceneEl.addEventListener("enter-vr", (ev) => {
+            this.wasVisible = this.el.getAttribute("visible");
+            if (this.el.sceneEl.is("ar-mode")) {
+              this.el.setAttribute("visible", false);
             }
           });
-          this.el.sceneEl.addEventListener('exit-vr', (ev) => {
-            if (this.wasVisible) this.el.setAttribute('visible', true);
+          this.el.sceneEl.addEventListener("exit-vr", (ev) => {
+            if (this.wasVisible) this.el.setAttribute("visible", true);
           });
-        }
-      });
-      
-      AFRAME.registerComponent('ar-shadows', {
-      
-        schema: {
-          opacity: {default: 0.3}
         },
+      });
+
+      module.exports = AFRAME.registerComponent("cube-env-map", {
+        schema: {
+          path: { default: "" },
+          extension: { default: "jpg" },
+          format: { default: "RGBFormat" },
+          enableBackground: { default: false },
+        },
+
         init: function () {
-          this.el.sceneEl.addEventListener('enter-vr', (ev) => {
-            this.wasVisible = this.el.getAttribute('visible');
-            if (this.el.sceneEl.is('ar-mode')) {
-              this.savedMaterial = this.el.object3D.children[0].material;
-              this.el.object3D.children[0].material = new THREE.ShadowMaterial();
-              this.el.object3D.children[0].material.opacity = this.data.opacity;
-              this.el.setAttribute('visible', true);
+          const data = this.data;
+
+          this.texture = new THREE.CubeTextureLoader().load([
+            data.path + "posx." + data.extension,
+            data.path + "negx." + data.extension,
+            data.path + "posy." + data.extension,
+            data.path + "negy." + data.extension,
+            data.path + "posz." + data.extension,
+            data.path + "negz." + data.extension,
+          ]);
+          this.texture.format = THREE[data.format];
+
+          if (data.enableBackground) {
+            this.el.sceneEl.object3D.background = this.texture;
+          }
+
+          this.applyEnvMap();
+          this.el.addEventListener("object3dset", this.applyEnvMap.bind(this));
+        },
+
+        applyEnvMap: function () {
+          const mesh = this.el.getObject3D("mesh");
+          const envMap = this.texture;
+
+          if (!mesh) return;
+
+          mesh.traverse(function (node) {
+            if (node.material && "envMap" in node.material) {
+              node.material.envMap = envMap;
+              node.material.needsUpdate = true;
             }
           });
-          this.el.sceneEl.addEventListener('exit-vr', (ev) => {
-            if (this.savedMaterial) {
-              this.el.object3D.children[0].material = this.savedMaterial;
-              this.savedMaterial = null;
-            }
-            if (!this.wasVisible) this.el.setAttribute('visible', false);
+        },
+      });
+
+      AFRAME.registerComponent("foo", {
+        init: function () {
+          var targetCube = new THREE.WebGLRenderTargetCube(512, 512);
+          var renderer = this.el.sceneEl.renderer;
+
+          this.el.addEventListener("model-loaded", (e) => {
+            let mesh = this.el.getObject3D("mesh");
+
+            var texture = new THREE.TextureLoader().load(
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Goat_Peak%2C_Cascades.jpg/1920px-Goat_Peak%2C_Cascades.jpg",
+              function () {
+                var cubeTex = targetCube.fromEquirectangularTexture(
+                  renderer,
+                  texture
+                );
+                mesh.traverse(function (el) {
+                  if (el.material) {
+                    el.material.envMap = cubeTex.texture;
+                    el.material.envMap.intensity = 1;
+                    el.material.needsUpdate = true;
+                  }
+                });
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.outputEncoding = THREE.sRGBEncoding;
+              }
+            );
           });
-        }
-      });    
-  </script>
-  </head>  
+        },
+      });      
+      
+    </script>
+  </head>
   <body>
-     
-   
-  <a-assets>
-    <audio id="locu" src="assets/LocuTorreOro.mp3" autoplay></audio>
-    <img id="ficha_t" src="assets/Ficha_Tecnica.png">
-  </a-assets>
-
-  
-
-    <a-scene renderer="antialias: true;
+    <a-scene
+      renderer="antialias: true;
                    colorManagement: true;
                    sortObjects: true;
-                   physicallyCorrectLights: false;
-                   maxCanvasWidth: 1920;
-                   maxCanvasHeight: 1920;">
-      <a-assets>
-         <a-asset-item id="retablo" src="assets/Retablo_SanJuanBautist.glb"></a-asset-item>
-      </a-assets>
-      <a-entity sound="src: #locu"></a-entity>
-      <a-entity id="fichatecnica" position="0 0 0">
-        <a-plane height="15" width="15" position="2.41719 2.99054 -3.96279" rotation="" shadow="" ar-shadows="" visible="" material="alphaTest: 1; transparent: true; blending: none; roughness: 0" geometry="" scale="0.1 0.1 0.1"></a-plane>
-      </a-entity>
-      <a-camera position="0 1.7 0"></a-camera>
-    
-      <a-entity id="retab" position="0 -1.7 -4" scale="0.5 0.5 0.5">
-        <a-entity position="0 2.15 0" rotation="0 0 0"
-                  gltf-model="#retablo"
-                  shadow="cast: true; receive: false"></a-entity>
-      </a-entity>  
-      
-      <a-entity light="type:  hemisphere;  castShadow:  true;  shadowMapHeight:  1024;  shadowMapWidth:  1024;  shadowCameraLeft:  -7;  angle:  57.93;  decay:  1.05;  intensity:  2.1"></a-entity>
-      <a-entity light="type: spot; castShadow: true; shadowMapHeight: 1024; shadowMapWidth: 1024; shadowCameraLeft: -7; angle: 55.99; decay: 1.14; intensity: 0.46" id="light" target="retab" position="-0.01 1.67411 1.05444"></a-entity>
+                   logarithmicDepthBuffer: true;
+                   physicallyCorrectLights: true;
+                   maxCanvasWidth: 1680;
+                   maxCanvasHeight: 1050;
+                   exposure:0.65;
+                   toneMapping:reinard;"
+      light="defaultLightsEnabled: false"
+      webxr="optionalFeatures: hit-test,local-floor;
+                optionalFeatures: dom-overlay,unbounded;
+                overlayElement:#overlay;"
+      shadow="type: pcfsoft"
+      ar-hit-test="target:#gruporetablo"
+      ar-cursor
+      reflection="directionalLight:#light_directional"
+    >
+      <a-entity
+        cursor="rayOrigin: mouse"
+        raycaster="objects: .boton"
+      ></a-entity>
 
-      <!-- This shadow-receiving plane is only visible in AR mode. -->
-      <a-plane height="15" width="15" position="0 0 -3" rotation="-90 0 0"
-               shadow="receive: true"
-               ar-shadows="opacity: 0.3"
-               visible="false"></a-plane>
+      <a-assets>
+        <a-asset-item
+          id="retablo"
+          src="assets/Retablo_partes_nomenclaturas.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="retablo_wireframe"
+          src="assets/Retablo_wireframe.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="nomenclaturas"
+          src="assets/txt-partes_nomenclaturas.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="calles_laterales"
+          src="assets/calles_laterales_selecc.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="calle_central"
+          src="assets/calles_Central_selecc.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="entre-calles"
+          src="assets/entrecalles_selecc.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="casas"
+          src="assets/casas_selecc.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="sotobancoseleccion"
+          src="assets/sotobanco_selecc.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="bancoseleccion"
+          src="assets/banco_selecc.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="primercuerposeleccion"
+          src="assets/primercuerpo_selecc.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="segundocuerposeleccion"
+          src="assets/segundocuerpo_selecc.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+        <a-asset-item
+          id="aticoseleccion"
+          src="assets/Atico_selecc.glb"
+          crossorigin="anonymous"
+        ></a-asset-item>
+      </a-assets>
+
+      <a-entity id="gruporetablo"
+                position="0 -0.5 0">
+        <a-entity
+          id="compretablo"
+          class="objects"
+          gltf-model="#retablo"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="true"
+          shadow="receive:false; cast:true"
+          foo
+          material-values="materialName:mat_oro; color: #C8A650; opacity: 1; metalness: 0.8; roughness: 0.6"
+        ></a-entity>
+        <a-entity
+          id="wireretablo"
+          class="objects"
+          gltf-model="#retablo_wireframe"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="false"
+          shadow="receive:true; cast:true"
+        ></a-entity>
+        <a-entity
+          id="nomenclat"
+          class="objects"
+          gltf-model="#nomenclaturas"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="true"
+          shadow="receive:true; cast:true"
+        ></a-entity>
+        <a-entity
+          id="calleslaterales"
+          class="objects"
+          gltf-model="#calles_laterales"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="false"
+          
+        ></a-entity>
+        <a-entity
+          id="callecentral"
+          class="objects"
+          gltf-model="#calle_central"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="false"
+          
+        ></a-entity>
+        <a-entity
+          id="entrecalles"
+          class="objects"
+          gltf-model="#entre-calles"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="false"
+          
+        ></a-entity>
+        <a-entity
+          id="casascuadros"
+          gltf-model="#casas"
+          position="0 0.829 -1.93"
+          scale="0.2 0.2 0.2"
+          visible="false"
+          
+        ></a-entity>
+        <a-entity
+          id="sotobanco"
+          class="objects"
+          gltf-model="#sotobancoseleccion"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="visible"
+          
+        ></a-entity>
+        <a-entity
+          id="banco"
+          class="objects"
+          gltf-model="#bancoseleccion"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="false"
+          
+        ></a-entity>
+        <a-entity
+          id="primcuerpo"
+          gltf-model="#primercuerposeleccion"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="false"
+          
+        ></a-entity>
+        <a-entity
+          id="segundcuerpo"
+          class="objects"
+          gltf-model="#segundocuerposeleccion"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="false"
+          
+        ></a-entity>
+        <a-entity
+          id="atico"
+          class="objects"
+          gltf-model="#aticoseleccion"
+          position="0 0.815 -1.905"
+          scale="0.2 0.2 0.2"
+          visible="false"
+          
+        ></a-entity>
+      </a-entity>
+
+      <a-entity
+        id="light_ambient"
+        light="type: hemisphere; intensity:2"
+        position="0 0 0"
+      ></a-entity>
+      <a-entity
+        id="light_directional;"
+        light="type: directional; target:#compretablo; intensity: 50; castShadow: true"
+        position="1.35 5.2 -1"
+      ></a-entity>
+
+      <a-camera position="0 1.6 0" look-controls  orbit-controls="target: 0 1.6 -0.5; minDistance: 0.5; maxDistance: 180; initialPosition: 0 5 15"> </a-camera>
     </a-scene>
+
+    <div id="overlay">
+      <div id="menu" class="botones">
+        <div id="mainUI">        
+        <div id="btn_filasup">
+          <div id="btnretablo" class="boton_retablo">Retablo</div>
+          <div id="btnwire" class="boton_wire">Alambre</div>
+          <div id="btnsotobanco" class="boton">Sotobanco</div>
+          <div id="btn_predela" class="boton">predela</div>
+          <div id="btn_primercuerpo" class="boton">I cuerpo</div>
+          <div id="btn_segundocuerpo" class="boton">II cuerpo</div>
+          <div id="btn_atico" class="boton">Ático</div>
+        </div>
+        <div id="btn_filainf">
+          <div id="nomenclatura" class="boton_nomen">leyendas</div>
+          <div id="btn_calleslaterales" class="boton">calles laterales</div>
+          <div id="btn_callecentral" class="boton">calles central</div>
+          <div id="btn_entrecalles" class="boton">entrecalles</div>
+          <div id="btn_casas" class="boton">casas</div>
+          
+        </div>
+    </div>
+      </div>
+    </div>
+
+    <script>
+      const btn_nomenclatura= document.querySelector("#nomenclatura");
+      
+      const btn_retablo = document.querySelector("#btnretablo");
+      const btn_alambre = document.querySelector("#btnwire");
+      const btn_sotobanco = document.querySelector("#btnsotobanco");
+      const btn_predela = document.querySelector("#btn_predela");
+      const btn_primercuerpo = document.querySelector("#btn_primercuerpo");
+      const btn_segundcuerpo = document.querySelector("#btn_segundocuerpo");
+      const btn_atico = document.querySelector("#btn_atico");
+      
+      const btn_calleslaterales = document.querySelector("#btn_calleslaterales");
+      const btn_callecentral = document.querySelector("#btn_callecentral");
+      const btn_entrecalles = document.querySelector("#btn_entrecalles");
+      const btn_casas = document.querySelector("#btn_casas");
+      
+      const retablo = document.querySelector("#compretablo");
+      const wireretablo = document.querySelector("#wireretablo");
+      const sotobanco = document.querySelector("#sotobanco");
+      const banco = document.querySelector("#banco");
+      const primercuerpo = document.querySelector("#primcuerpo");
+      const segundocuerpo = document.querySelector("#segundcuerpo");
+      const atico = document.querySelector("#atico");
+      
+      const calleslaterales = document.querySelector("#calleslaterales");
+      const callecentral = document.querySelector("#callecentral");
+      const entrecalles = document.querySelector("#entrecalles");
+      const casas = document.querySelector("#casascuadros");
+      
+      const nomenclatura = document.querySelector("#nomenclat");
+      
+       btn_nomenclatura.addEventListener("click", function (){
+        nomenclatura.setAttribute("visible", !nomenclatura.getAttribute('visible'));
+      })
+      
+      btn_retablo.addEventListener("click", function (){
+        retablo.setAttribute("visible", !retablo.getAttribute('visible'));
+        wireretablo.setAttribute("visible", false);
+      })
+      
+      btn_alambre.addEventListener("click", function (){
+        wireretablo.setAttribute("visible", !wireretablo.getAttribute('visible'));
+        retablo.setAttribute("visible", false); 
+      })
+      
+       btn_sotobanco.addEventListener("click", function (){
+         sotobanco.setAttribute("visible", !sotobanco.getAttribute('visible'));
+         banco.setAttribute("visible", false);
+         primercuerpo.setAttribute("visible", false);
+         segundocuerpo.setAttribute("visible", false);
+         atico.setAttribute("visible", false);
+      })
+      
+       btn_predela.addEventListener("click", function (){
+        banco.setAttribute("visible", !banco.getAttribute('visible'));
+        sotobanco.setAttribute("visible", false);        
+        primercuerpo.setAttribute("visible", false);
+        segundocuerpo.setAttribute("visible", false);
+        atico.setAttribute("visible", false);  
+      })
+      
+       btn_primercuerpo.addEventListener("click", function (){
+        primercuerpo.setAttribute("visible", !primercuerpo.getAttribute('visible'));
+        sotobanco.setAttribute("visible", false);
+        banco.setAttribute("visible", false);        
+        segundocuerpo.setAttribute("visible", false);
+        atico.setAttribute("visible", false);   
+      })
+      
+       btn_segundcuerpo.addEventListener("click", function (){
+        segundocuerpo.setAttribute("visible", !segundocuerpo.getAttribute('visible'));
+        banco.setAttribute("visible", false);
+        sotobanco.setAttribute("visible", false);        
+        primercuerpo.setAttribute("visible", false);        
+        atico.setAttribute("visible", false);     
+      })
+      
+      btn_atico.addEventListener("click", function (){
+        atico.setAttribute("visible", !atico.getAttribute('visible'));
+        banco.setAttribute("visible", false);
+        sotobanco.setAttribute("visible", false);        
+        primercuerpo.setAttribute("visible", false);
+        segundocuerpo.setAttribute("visible", false);            
+      })
+      
+      btn_calleslaterales.addEventListener("click", function (){
+        calleslaterales.setAttribute("visible", !calleslaterales.getAttribute('visible'));
+      })
+      
+       btn_callecentral.addEventListener("click", function (){
+        callecentral.setAttribute("visible", !callecentral.getAttribute('visible'));
+      })
+      
+       btn_entrecalles.addEventListener("click", function (){
+        entrecalles.setAttribute("visible", !entrecalles.getAttribute('visible'));
+      })
+      
+      btn_casas.addEventListener("click", function (){
+        casas.setAttribute("visible", !casas.getAttribute('visible'));
+      })
+      
+      
+      
+       btn_nomenclatura.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_retablo.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_alambre.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_sotobanco.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_predela.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_primercuerpo.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_segundcuerpo.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_atico.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_calleslaterales.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_callecentral.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_entrecalles.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+       btn_casas.addEventListener('beforexrselect', e => {
+        e.preventDefault();
+      })
+    </script>
   </body>
 </html>
+
